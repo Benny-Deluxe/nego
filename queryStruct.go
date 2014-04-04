@@ -1,1 +1,1 @@
-package nextelastic
+package nextelasticgo

@@ -1,4 +1,4 @@
-package nextelastic
+package nextelasticgo
 
 // ElasticTracker struct to talk with an ElasticSearch server
 type ElasticTracker struct {
