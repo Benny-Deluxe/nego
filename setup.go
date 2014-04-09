@@ -1,4 +1,4 @@
-package nextelasticgo
+package nego
 
 import (
 	"fmt"

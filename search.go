@@ -1,4 +1,4 @@
-package nextelasticgo
+package nego
 
 //MakeMatchQuery return MatchQuery ready to be Json
 func MakeMatchQuery(Field, Query, Type, Operator string, Boost float32) *map[string]interface{} {

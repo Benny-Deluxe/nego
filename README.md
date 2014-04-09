@@ -1,4 +1,4 @@
-NextElasticGo
-=============
+Next Elastic Go (NEGo)
+======================
 
-A Library to help you with your elasticsearch in Go
+A Library to help you with your ElasticSearch in Go
