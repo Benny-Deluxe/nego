@@ -48,8 +48,8 @@ func (that *ElasticTracker) GetFromElastic(bucket string, media string, index st
 	return f.Source, nil
 }
 
-// CompleteFromElastic Return A Search for Completion
-func (that *ElasticTracker) CompleteFromElastic(bucket string, media string, query []byte) (*SearchHitsStruct, error) {
+// SearchFromElastic Return A Search from elastic
+func (that *ElasticTracker) SearchFromElastic(bucket string, media string, query []byte) (*SearchHitsStruct, error) {
 	//fmt.Printf("QUERY\n%s\n", query)
 	rep := that.nEQuery("POST", that.servAddr+"/"+bucket+"/"+media+"/_search", query)
 	if rep.Error != nil {

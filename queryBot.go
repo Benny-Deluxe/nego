@@ -87,7 +87,7 @@ func nEReputQuery(query nEQuery, queries chan nEQuery, freeretry bool, lastError
 	queries <- query
 }
 
-func nEQueryBot(queries chan nEQuery, num int) {
+func nEQueryBot(queries chan nEQuery, exitchan chan bool, num int) {
 	for {
 		//fmt.Println("Bot", num, "is waiting")
 		select {
@@ -98,6 +98,8 @@ func nEQueryBot(queries chan nEQuery, num int) {
 			} else {
 				query.answer <- nEAnswer{ret, status, err}
 			}
+		case _ = <- exitchan:
+			return
 		}
 	}
 }
