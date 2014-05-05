@@ -1,12 +1,12 @@
-	package nego
+package nego
 
 // ElasticTracker struct to talk with an ElasticSearch server
 type ElasticTracker struct {
 	buckets  map[string]bool
 	servAddr string
 	queries  chan nEQuery
-	exitbot	chan bool
-	nbbot int
+	exitbot  chan bool
+	nbbot    int
 }
 
 // NewElasticTracker Get a new instance of ElasticTracker

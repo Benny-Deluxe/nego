@@ -98,7 +98,7 @@ func nEQueryBot(queries chan nEQuery, exitchan chan bool, num int) {
 			} else {
 				query.answer <- nEAnswer{ret, status, err}
 			}
-		case _ = <- exitchan:
+		case _ = <-exitchan:
 			return
 		}
 	}
