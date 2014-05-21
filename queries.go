@@ -67,6 +67,26 @@ func (that *ElasticTracker) SearchFromElastic(bucket string, media string, query
 	return &f.Hits, nil
 }
 
+// SearchFromElasticDFS Return A Search from elastic
+func (that *ElasticTracker) SearchFromElasticDFS(bucket string, media string, query []byte) (*SearchHitsStruct, error) {
+	//fmt.Printf("QUERY\n%s\n", query)
+	rep := that.nEQuery("POST", that.servAddr+"/"+bucket+"/"+media+"/_search?search_type=dfs_query_then_fetch", query)
+	if rep.Error != nil {
+		return nil, rep.Error
+	}
+	if rep.StatusCode < 200 || rep.StatusCode >= 300 {
+		return nil, fmt.Errorf(" CompleteFromElastic %d status code returned %s", rep.StatusCode, rep.Response)
+	}
+	f := SearchFromElasticStruct{}
+	err := json.Unmarshal(rep.Response, &f)
+	if err != nil {
+		fmt.Printf("Error %s!\n", err.Error())
+		return nil, err
+	}
+	return &f.Hits, nil
+}
+
+
 // ForceRefreshElastic Force refresh of that bucket
 func (that *ElasticTracker) ForceRefreshElastic(bucket string) error {
 	rep := that.nEQuery("POST", that.servAddr+"/"+bucket+"/_refresh", nil)
