@@ -20,21 +20,21 @@ type nEQuery struct {
 	method  string // 1 GET 2 PUT 3 POST
 	payload []byte
 	tries   int64
-	answer  chan nEAnswer
 }
 
 func (that *ElasticTracker) nEQuery(method, query string, payload []byte) nEAnswer {
-	a := make(chan nEAnswer)
 	q := nEQuery{
 		query:   query,
 		payload: payload,
 		method:  method,
 		tries:   3,
-		answer:  a,
 	}
-	that.queries <- q
-	ret := <-a
-	return ret
+	ret, status, err := that.nEDoHTTP(&q)
+	for ret == nil && q.tries > 0 {
+		time.Sleep(100 * time.Millisecond)
+		ret, status, err = that.nEDoHTTP(&q)
+	}
+	return nEAnswer{ret, status, err}
 }
 
 func nESetBody(r *http.Request, body io.Reader) {
@@ -54,7 +54,8 @@ func nESetBody(r *http.Request, body io.Reader) {
 
 }
 
-func nEDoHTTP(query nEQuery) ([]byte, int, error) {
+func (that *ElasticTracker) nEDoHTTP(query *nEQuery) ([]byte, int, error) {
+	query.tries--
 	req, err := http.NewRequest(query.method, query.query, nil)
 	if err != nil {
 		return nil, 0, err
@@ -63,7 +64,7 @@ func nEDoHTTP(query nEQuery) ([]byte, int, error) {
 	if query.payload != nil {
 		nESetBody(req, bytes.NewReader(query.payload))
 	}
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := that.client.Do(req)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -73,33 +74,4 @@ func nEDoHTTP(query nEQuery) ([]byte, int, error) {
 		return nil, 0, err
 	}
 	return body, resp.StatusCode, err
-}
-
-func nEReputQuery(query nEQuery, queries chan nEQuery, freeretry bool, lastError error, lastStatus int) {
-	if !freeretry {
-		query.tries--
-	}
-	if query.tries <= 0 {
-		query.answer <- nEAnswer{nil, lastStatus, lastError}
-		return
-	}
-	time.Sleep(100 * time.Millisecond)
-	queries <- query
-}
-
-func nEQueryBot(queries chan nEQuery, exitchan chan bool, num int) {
-	for {
-		//fmt.Println("Bot", num, "is waiting")
-		select {
-		case query := <-queries:
-			ret, status, err := nEDoHTTP(query)
-			if ret == nil {
-				go nEReputQuery(query, queries, false, err, status)
-			} else {
-				query.answer <- nEAnswer{ret, status, err}
-			}
-		case _ = <-exitchan:
-			return
-		}
-	}
 }
